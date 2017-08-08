@@ -20,7 +20,7 @@
 
 ## How to run
 
-For example, we train the active learning policy on English and then apply the policy to German.
+For example, we train an active learning policy on English and then apply the policy to German.
 
 ```sh
 python launcher_ner_bilingual.py --agent "CNNDQN" --episode 10000 --budget 1000 --train "en.train;en.testa;en.testb;en.emb;en.model.saved" --test "de.train;de.testa;de.testb;de.emb;de.model.saved"
