@@ -168,9 +168,9 @@ def play_ner():
     actions = 2
     global AGENT
     if AGENT == "random":
-        robot = robotRandom(actions)
+        robot = RobotRandom(actions)
     elif AGENT == "DQN":
-        robot = robotDQN(actions)
+        robot = RobotDQN(actions)
     elif AGENT == "CNNDQN":
         robot = RobotCNNDQN(actions)
     else:
