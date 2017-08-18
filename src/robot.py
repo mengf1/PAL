@@ -84,7 +84,27 @@ class RobotCNNDQN:
         state_batch = [data[0] for data in minibatch]
         action_batch = [data[1] for data in minibatch]
         reward_batch = [data[2] for data in minibatch]
-        nextState_batch = [data[3] for data in minibatch]
+        next_state_batch = [data[3] for data in minibatch]
+        next_state_sent_batch = []
+        next_state_confidence_batch = []
+        next_state_predictions_batch = []
+        for item in next_state_batch:
+            sent, confidence, predictions = item
+            next_state_sent_batch.append(sent)
+            next_state_confidence_batch.append(confidence)
+            next_state_predictions_batch.append(predictions)
+
+        # Step 2: calculate y
+        y_batch = []
+        qvalue_batch = self.sess.run(self.qvalue, feed_dict={
+                                     self.sent: next_state_sent_batch, self.state_confidence: next_state_confidence_batch, self.predictions: next_state_predictions_batch})
+        for i in range(0, BATCH_SIZE):
+            terminal = minibatch[i][4]
+            if terminal:
+                y_batch.append(reward_batch[i])
+            else:
+                y_batch.append(reward_batch[i] +
+                               GAMMA * np.max(qvalue_batch[i]))
         sent_batch = []
         confidence_batch = []
         predictions_batch = []
@@ -93,18 +113,6 @@ class RobotCNNDQN:
             sent_batch.append(sent)
             confidence_batch.append(confidence)
             predictions_batch.append(predictions)
-
-        # Step 2: calculate y
-        y_batch = []
-        qvalue_batch = self.sess.run(self.qvalue, feed_dict={
-                                     self.sent: sent_batch, self.state_confidence: confidence_batch, self.predictions: predictions_batch})
-        for i in range(0, BATCH_SIZE):
-            terminal = minibatch[i][4]
-            if terminal:
-                y_batch.append(reward_batch[i])
-            else:
-                y_batch.append(reward_batch[i] +
-                               GAMMA * np.max(qvalue_batch[i]))
 
         self.sess.run(self.trainStep, feed_dict={
                       self.y_input: y_batch, self.action_input: action_batch, self.sent: sent_batch, self.state_confidence: confidence_batch, self.predictions: predictions_batch})
