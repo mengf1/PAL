@@ -226,11 +226,9 @@ def test(robot):
 
 def main():
     parse_args()
-    # budget = 1000
-    # game for training
+    # play games for training a robot
     robot = play_ner()
-    # new game 2
-    # max_len = 120
+    # play a new game with the trained robot
     test(robot)
 
 if __name__ == '__main__':
