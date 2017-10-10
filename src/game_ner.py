@@ -2,6 +2,7 @@ import numpy as np
 import sys
 import random
 from tagger import CRFTagger
+import helpers
 #from gensim.models import doc2vec, word2vec
 import tensorflow as tf
 
@@ -31,25 +32,23 @@ class NERGame:
         self.queried_times = 0
 
         # select pool
-        self.queried_x = []
-        self.queried_y = []
-        self.queried_idx = []
+        self.queried_set_x = []
+        self.queried_set_y = []
+        self.queried_set_idx = []
 
         # let's start
         self.episode = 1
         # story frame
-        self.currentFrame = 0
-        #self.nextFrame = self.currentFrame + 1
+        self.current_frame = 0
+        #self.nextFrame = self.current_frame + 1
         self.terminal = False
         self.make_query = False
         self.performance = 0
 
-    # if there is an input from the tagger side, then it is
-    # getFrame(self,tagger)
     def get_frame(self, model):
         self.make_query = False
-        sentence = self.train_x[self.order[self.currentFrame]]
-        sentence_idx = self.train_idx[self.order[self.currentFrame]]
+        sentence = self.train_x[self.order[self.current_frame]]
+        sentence_idx = self.train_idx[self.order[self.current_frame]]
         confidence = 0.
         predictions = []
         if model.name == "CRF":
@@ -87,21 +86,20 @@ class NERGame:
                 #reward = -1.
         else:
             reward = 0.
+
         # next frame
-        isTerminal = False
+        is_terminal = False
         if self.queried_times == self.budget:
             self.terminal = True
+            is_terminal = True
             # update special reward
-            isTerminal = True
-            reward = new_performance * 100
-            self.reboot()  # set current frame = -1
+            # reward = new_performance * 100
+            self.reboot()  # set the current frame = -1
         else:
             self.terminal = False
-            # self.currentFrame = self.nextFrame # prepare next frame
-            #self.nextFrame = self.currentFrame + 1
-        next_sentence = self.train_x[self.order[self.currentFrame + 1]]
-        next_sentence_idx = self.train_idx[self.order[self.currentFrame + 1]]
-        #next_sentence = self.story[self.order[self.nextFrame]]
+        next_sentence = self.train_x[self.order[self.current_frame + 1]]
+        next_sentence_idx = self.train_idx[self.order[self.current_frame + 1]]
+
         confidence = 0.
         predictions = []
         if model.name == "CRF":
@@ -122,39 +120,39 @@ class NERGame:
             preds_padding = predictions
 
         next_observation = [next_sentence_idx, confidence, preds_padding]
-        #next_observation = [next_sentence]
-        self.currentFrame += 1
-        return reward, next_observation, isTerminal
+        self.current_frame += 1
+        return reward, next_observation, is_terminal
 
     def query(self):
         if self.make_query == True:
-            sentence = self.train_x[self.order[self.currentFrame]]
+            sentence = self.train_x[self.order[self.current_frame]]
             # simulate: obtain the labels
-            labels = self.train_y[self.order[self.currentFrame]]
+            labels = self.train_y[self.order[self.current_frame]]
             self.queried_times += 1
             # print "Select:", sentence, labels
-            self.queried_x.append(sentence)
-            self.queried_y.append(labels)
-            self.queried_idx.append(
-                self.train_idx[self.order[self.currentFrame]])
-            print "> Queried times", len(self.queried_x)
+            self.queried_set_x.append(sentence)
+            self.queried_set_y.append(labels)
+            self.queried_set_idx.append(
+                self.train_idx[self.order[self.current_frame]])
+            print "> Queried times", len(self.queried_set_x)
 
     # tagger = model
     def get_performance(self, tagger):
-        # train on queried_x, queried_y
-        # single training: self.model.train(self.queried_x, self.queried_y)
-        # train on mutiple epochs
+        # train with {queried_set_x, queried_set_y}
+        # train with examples: self.model.train(self.queried_set_x,
+        # self.queried_set_y)
         if tagger.name == "RNN":
-            tagger.train(self.queried_idx, self.queried_y)
+            tagger.train(self.queried_set_idx, self.queried_set_y)
             performance = tagger.test(self.dev_idx, self.dev_y)
             return performance
 
-        print len(self.queried_x), len(self.queried_y)
-        train_sents = self.data2sents(self.queried_x, self.queried_y)
+        print len(self.queried_set_x), len(self.queried_set_y)
+        train_sents = helpers.data2sents(
+            self.queried_set_x, self.queried_set_y)
         # print train_sents
         tagger.train(train_sents)
         # test on development data
-        test_sents = self.data2sents(self.dev_x, self.dev_y)
+        test_sents = helpers.data2sents(self.dev_x, self.dev_y)
         performance = tagger.test(test_sents)
         #performance = self.model.test2conlleval(self.dev_x, self.dev_y)
         return performance
@@ -164,25 +162,11 @@ class NERGame:
         # why not use docvecs? TypeError: 'DocvecsArray' object does not
         # support item assignment
         random.shuffle(self.order)
-        # todo we also need to change the train data order
-        #self.budget = 100
         self.queried_times = 0
         self.terminal = False
-        self.queried_x = []
-        self.queried_y = []
-        self.queried_idx = []
-        self.currentFrame = -1
+        self.queried_set_x = []
+        self.queried_set_y = []
+        self.queried_set_idx = []
+        self.current_frame = -1
         self.episode += 1
         print "> Next episode", self.episode
-
-    def data2sents(self, X, Y):
-        data = []
-        # print Y
-        for i in range(len(Y)):
-            sent = []
-            text = X[i]
-            items = text.split()
-            for j in range(len(Y[i])):
-                sent.append((items[j], str(Y[i][j])))
-            data.append(sent)
-        return data
