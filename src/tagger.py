@@ -7,9 +7,9 @@ import math
 
 class CRFTagger(object):
 
-    def __init__(self, modelfile):
+    def __init__(self, model_file):
         print("CRF Tagger")
-        self.modelfile = modelfile
+        self.model_file = model_file
         self.name = "CRF"
 
     def word2features(self, sent, i):
@@ -78,7 +78,7 @@ class CRFTagger(object):
             # include transitions that are possible, but not observed
             'feature.possible_transitions': True
         })
-        trainer.train(self.modelfile)
+        trainer.train(self.model_file)
         if len(trainer.logparser.iterations) != 0:
             print len(trainer.logparser.iterations), trainer.logparser.iterations[-1]
         else:
@@ -88,20 +88,21 @@ class CRFTagger(object):
 
     # different lens
     def get_predictions(self, sent):
+        sent = sent.split()
         x = self.sent2features(sent)
         tagger = pycrfsuite.Tagger()
-        if not os.path.isfile(self.modelfile):
+        if not os.path.isfile(self.model_file):
             y_marginals = []
-            for i in range(len(x)):
+            for i in range(len(sent)):
                 y_marginals.append([0.2] * 5)
             return y_marginals
 
-        tagger.open(self.modelfile)
-        tagger.set(x)
+        tagger.open(self.model_file)
+        tagger.set(sent)
         y_marginals = []
         print tagger.labels()
         # if len(tagger.labels) < 5
-        for i in range(len(x)):
+        for i in range(len(sent)):
             y_i = []
             for y in range(1, 6):
                 if str(y) in tagger.labels():
@@ -113,26 +114,28 @@ class CRFTagger(object):
 
     # use P(yseq|xseq)
     def get_confidence(self, sent):
+        sent = sent.split()
         x = self.sent2features(sent)
         tagger = pycrfsuite.Tagger()
-        if not os.path.isfile(self.modelfile):
+        if not os.path.isfile(self.model_file):
             confidence = 0.2
             return [confidence]
 
-        tagger.open(self.modelfile)
-        tagger.set(x)
+        tagger.open(self.model_file)
+        tagger.set(sent)
         y_pred = tagger.tag()
         p_y_pred = tagger.probability(y_pred)
         confidence = pow(p_y_pred, 1. / len(y_pred))
         return [confidence]
 
     def get_uncertainty(self, sent):
+        sent = sent.split()
         x = self.sent2features(sent)
         tagger = pycrfsuite.Tagger()
-        if not os.path.isfile(self.modelfile):
+        if not os.path.isfile(self.model_file):
             unc = random.random()
             return unc
-        tagger.open(self.modelfile)
+        tagger.open(self.model_file)
         tagger.set(x)
         ttk = 0.
         for i in range(len(x)):
@@ -153,7 +156,7 @@ class CRFTagger(object):
         X_test = [self.sent2features(s) for s in test_sents]
         Y_true = [self.sent2labels(s) for s in test_sents]
         tagger = pycrfsuite.Tagger()
-        tagger.open(self.modelfile)
+        tagger.open(self.model_file)
         y_pred = [tagger.tag(xseq) for xseq in X_test]
         pre = 0
         pre_tot = 0
