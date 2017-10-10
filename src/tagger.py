@@ -100,7 +100,7 @@ class CRFTagger(object):
         tagger.open(self.model_file)
         tagger.set(sent)
         y_marginals = []
-        print tagger.labels()
+        print "Tagset", tagger.labels()
         # if len(tagger.labels) < 5
         for i in range(len(sent)):
             y_i = []
