@@ -118,7 +118,7 @@ def test_agent_batch(robot, game, model, budget):
         sel_ind = random.randint(0, len(game.train_x))
         # construct the observation
         observation = game.get_frame(model)
-        action = robot.getAction(observation)
+        action = robot.get_action(observation)
         if action[1] == 1:
             sentence = game.train_x[sel_ind]
             labels = game.train_y[sel_ind]
@@ -146,7 +146,7 @@ def test_agent_online(robot, game, model, budget):
         sel_ind = random.randint(0, len(game.train_x))
         # construct the observation
         observation = game.get_frame(model)
-        action = robot.getAction(observation)
+        action = robot.get_action(observation)
         if action[1] == 1:
             sentence = game.train_x[sel_ind]
             labels = game.train_y[sel_ind]
