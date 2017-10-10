@@ -40,6 +40,7 @@ def parse_args():
     AGENT = args.agent
     MAX_EPISODE = int(args.episode)
     BUDGET = int(args.budget)
+    # load the train data: source languages
     parts = args.train.split(";")
     if len(parts) % 5 != 0:
         print "Wrong inputs of training"
@@ -47,13 +48,14 @@ def parse_args():
     global TRAIN_LANG_NUM
     TRAIN_LANG_NUM = len(parts) / 5
     for i in range(TRAIN_LANG_NUM):
-        i_lang = i * 5
-        train = parts[i_lang + 0]
-        test = parts[i_lang + 1]
-        dev = parts[i_lang + 2]
-        emb = parts[i_lang + 3]
-        tagger = parts[i_lang + 4]
+        lang_i = i * 5
+        train = parts[lang_i + 0]
+        test = parts[lang_i + 1]
+        dev = parts[lang_i + 2]
+        emb = parts[lang_i + 3]
+        tagger = parts[lang_i + 4]
         TRAIN_LANG.append((train, test, dev, emb, tagger))
+    # load the test data: target languages
     parts = args.test.split(";")
     if len(parts) % 5 != 0:
         print "Wrong inputs of testing"
@@ -61,21 +63,21 @@ def parse_args():
     global TEST_LANG_NUM
     TEST_LANG_NUM = len(parts) / 5
     for i in range(TEST_LANG_NUM):
-        i_lang = i * 5
-        train = parts[i_lang + 0]
-        test = parts[i_lang + 1]
-        dev = parts[i_lang + 2]
-        emb = parts[i_lang + 3]
-        tagger = parts[i_lang + 4]
+        lang_i = i * 5
+        train = parts[lang_i + 0]
+        test = parts[lang_i + 1]
+        dev = parts[lang_i + 2]
+        emb = parts[lang_i + 3]
+        tagger = parts[lang_i + 4]
         TEST_LANG.append((train, test, dev, emb, tagger))
 
 
-def initialise_game(trainFile, testFile, devFile, embFile, budget):
+def initialise_game(train_file, test_file, dev_file, emb_file, budget):
     # Load data
     print("Loading data ..")
-    train_x, train_y, train_lens = helpers.load_data2labels(trainFile)
-    test_x, test_y, test_lens = helpers.load_data2labels(testFile)
-    dev_x, dev_y, dev_lens = helpers.load_data2labels(devFile)
+    train_x, train_y, train_lens = helpers.load_data2labels(train_file)
+    test_x, test_y, test_lens = helpers.load_data2labels(test_file)
+    dev_x, dev_y, dev_lens = helpers.load_data2labels(dev_file)
 
     print("Processing data")
     # build vocabulary
@@ -93,7 +95,7 @@ def initialise_game(trainFile, testFile, devFile, embFile, budget):
     # build embeddings
     vocab = vocab_processor.vocabulary_
     vocab_size = FLAGS.max_vocab_size
-    w2v = helpers.load_crosslingual_embeddings(embFile, vocab, vocab_size)
+    w2v = helpers.load_crosslingual_embeddings(emb_file, vocab, vocab_size)
 
     # prepare story
     story = [train_x, train_y, train_idx]
@@ -115,7 +117,7 @@ def test_agent_batch(robot, game, model, budget):
     while i < budget:
         sel_ind = random.randint(0, len(game.train_x))
         # construct the observation
-        observation = game.getFrame(model)
+        observation = game.get_frame(model)
         action = robot.getAction(observation)
         if action[1] == 1:
             sentence = game.train_x[sel_ind]
@@ -143,7 +145,7 @@ def test_agent_online(robot, game, model, budget):
     while i < budget:
         sel_ind = random.randint(0, len(game.train_x))
         # construct the observation
-        observation = game.getFrame(model)
+        observation = game.get_frame(model)
         action = robot.getAction(observation)
         if action[1] == 1:
             sentence = game.train_x[sel_ind]
