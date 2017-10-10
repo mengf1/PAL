@@ -185,7 +185,7 @@ class CRFTagger(object):
         else:
             pre = 1. * pre / pre_tot
         rec = 1. * rec / rec_tot
-        print pre, rec
+        print "Precision", pre, "Recall", rec
 
         beta = 1
         f1score = 0
