@@ -1,7 +1,6 @@
 import numpy as np
 import sys
 import random
-import utilities
 from tagger import CRFTagger
 #from gensim.models import doc2vec, word2vec
 import tensorflow as tf

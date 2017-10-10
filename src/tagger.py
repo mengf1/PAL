@@ -1,6 +1,6 @@
 import pycrfsuite
 import os
-import utilities
+import helpers
 import random
 import math
 
@@ -169,11 +169,11 @@ class CRFTagger(object):
                 total += 1
                 if y_pred[i][j] == Y_true[i][j]:
                     corr += 1
-                if utilities.label2str[int(y_pred[i][j])] != 'O':  # not 'O'
+                if helpers.label2str[int(y_pred[i][j])] != 'O':  # not 'O'
                     pre_tot += 1
                     if y_pred[i][j] == Y_true[i][j]:
                         pre += 1
-                if utilities.label2str[int(Y_true[i][j])] != 'O':
+                if helpers.label2str[int(Y_true[i][j])] != 'O':
                     rec_tot += 1
                     if y_pred[i][j] == Y_true[i][j]:
                         rec += 1

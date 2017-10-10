@@ -3,7 +3,7 @@ import argparse
 from game_ner import NERGame
 from robot import RobotCNNDQN
 import numpy as np
-import utilities
+import helpers
 import tensorflow as tf
 import random
 from tagger import CRFTagger
@@ -73,9 +73,9 @@ def parse_args():
 def initialise_game(trainFile, testFile, devFile, embFile, budget):
     # Load data
     print("Loading data ..")
-    train_x, train_y, train_lens = utilities.load_data2labels(trainFile)
-    test_x, test_y, test_lens = utilities.load_data2labels(testFile)
-    dev_x, dev_y, dev_lens = utilities.load_data2labels(devFile)
+    train_x, train_y, train_lens = helpers.load_data2labels(trainFile)
+    test_x, test_y, test_lens = helpers.load_data2labels(testFile)
+    dev_x, dev_y, dev_lens = helpers.load_data2labels(devFile)
 
     print("Processing data")
     # build vocabulary
@@ -93,7 +93,7 @@ def initialise_game(trainFile, testFile, devFile, embFile, budget):
     # build embeddings
     vocab = vocab_processor.vocabulary_
     vocab_size = FLAGS.max_vocab_size
-    w2v = utilities.load_crosslingual_embeddings(embFile, vocab, vocab_size)
+    w2v = helpers.load_crosslingual_embeddings(embFile, vocab, vocab_size)
 
     # prepare story
     story = [train_x, train_y, train_idx]
@@ -111,7 +111,7 @@ def test_agent_batch(robot, game, model, budget):
     queried_x = []
     queried_y = []
     performance = []
-    test_sents = utilities.data2sents(game.test_x, game.test_y)
+    test_sents = helpers.data2sents(game.test_x, game.test_y)
     while i < budget:
         sel_ind = random.randint(0, len(game.train_x))
         # construct the observation
@@ -123,11 +123,11 @@ def test_agent_batch(robot, game, model, budget):
             queried_x.append(sentence)
             queried_y.append(labels)
             i += 1
-            train_sents = utilities.data2sents(queried_x, queried_y)
+            train_sents = helpers.data2sents(queried_x, queried_y)
             model.train(train_sents)
             performance.append(model.test(test_sents))
     # train a crf and evaluate it
-    train_sents = utilities.data2sents(queried_x, queried_y)
+    train_sents = helpers.data2sents(queried_x, queried_y)
     model.train(train_sents)
     performance.append(model.test(test_sents))
     print "***TEST", performance
@@ -139,7 +139,7 @@ def test_agent_online(robot, game, model, budget):
     queried_x = []
     queried_y = []
     performance = []
-    test_sents = utilities.data2sents(game.test_x, game.test_y)
+    test_sents = helpers.data2sents(game.test_x, game.test_y)
     while i < budget:
         sel_ind = random.randint(0, len(game.train_x))
         # construct the observation
@@ -151,14 +151,14 @@ def test_agent_online(robot, game, model, budget):
             queried_x.append(sentence)
             queried_y.append(labels)
             i += 1
-            train_sents = utilities.data2sents(queried_x, queried_y)
+            train_sents = helpers.data2sents(queried_x, queried_y)
             model.train(train_sents)
             performance.append(model.test(test_sents))
 
         reward, observation2, terminal = game.feedback(action, model)  # game
         robot.update(observation, action, reward, observation2, terminal)
     # train a crf and evaluate it
-    train_sents = utilities.data2sents(queried_x, queried_y)
+    train_sents = helpers.data2sents(queried_x, queried_y)
     model.train(train_sents)
     performance.append(model.test(test_sents))
     print "***TEST", performance
