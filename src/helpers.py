@@ -9,7 +9,9 @@ label2str = {1: "PER", 2: "LOC", 3: "ORG", 4: "MISC", 5: "O"}
 
 # predefine a label_set: PER - 1, LOC - 2, ORG - 3, MISC - 4, O - 5
 # 0 is for padding
-labels_map = {'B-ORG': 3, 'O': 5, 'B-MISC': 4, 'B-PER': 1, 'I-PER': 1, 'B-LOC': 2, 'I-ORG': 3, 'I-MISC': 4, 'I-LOC': 2}
+labels_map = {'B-ORG': 3, 'O': 5, 'B-MISC': 4, 'B-PER': 1,
+              'I-PER': 1, 'B-LOC': 2, 'I-ORG': 3, 'I-MISC': 4, 'I-LOC': 2}
+
 
 def load_data2labels(input_file):
     seq_set = []
