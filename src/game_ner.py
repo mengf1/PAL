@@ -74,6 +74,7 @@ class NERGame:
     # tagger = crf model
     def feedback(self, action, model):
         reward = 0.
+        is_terminal = False
         if action[1] == 1:
             self.make_query = True
             self.query()
@@ -88,17 +89,22 @@ class NERGame:
             reward = 0.
 
         # next frame
-        is_terminal = False
+        next_sentence = []
+        next_sentence_idx = []
         if self.queried_times == self.budget:
             self.terminal = True
             is_terminal = True
             # update special reward
             # reward = new_performance * 100
-            self.reboot()  # set the current frame = -1
+            # prepare the next game
+            self.reboot()  # set the current frame = 0
+            next_sentence = self.train_x[self.order[self.current_frame]]
+            next_sentence_idx = self.train_idx[self.order[self.current_frame]]
         else:
             self.terminal = False
-        next_sentence = self.train_x[self.order[self.current_frame + 1]]
-        next_sentence_idx = self.train_idx[self.order[self.current_frame + 1]]
+            next_sentence = self.train_x[self.order[self.current_frame + 1]]
+            next_sentence_idx = self.train_idx[self.order[self.current_frame + 1]]
+            self.current_frame += 1
 
         confidence = 0.
         predictions = []
@@ -120,7 +126,6 @@ class NERGame:
             preds_padding = predictions
 
         next_observation = [next_sentence_idx, confidence, preds_padding]
-        self.current_frame += 1
         return reward, next_observation, is_terminal
 
     def query(self):
@@ -167,6 +172,6 @@ class NERGame:
         self.queried_set_x = []
         self.queried_set_y = []
         self.queried_set_idx = []
-        self.current_frame = -1
+        self.current_frame = 0
         self.episode += 1
         print "> Next episode", self.episode
