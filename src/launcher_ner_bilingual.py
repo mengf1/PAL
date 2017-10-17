@@ -189,7 +189,8 @@ def play_ner():
         # initilise a NER game
         game = initialise_game(train, test, dev, emb, BUDGET)
         # initialise a decision robot
-        robot.initialise(game.max_len, game.w2v)
+        # robot.initialise(game.max_len, game.w2v)
+        robot.update_embeddings(game.w2v)
         # tagger
         model = CRFTagger(tagger)
         # play game
