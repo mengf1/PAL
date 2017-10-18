@@ -37,7 +37,7 @@ class NERGame:
         self.queried_set_idx = []
 
         # let's start
-        self.episode = 1
+        self.episode = 0
         # story frame
         self.current_frame = 0
         #self.nextFrame = self.current_frame + 1
