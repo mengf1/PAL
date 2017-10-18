@@ -129,6 +129,7 @@ def test_agent_batch(robot, game, model, budget):
             train_sents = helpers.data2sents(queried_x, queried_y)
             model.train(train_sents)
             performance.append(model.test(test_sents))
+        game.current_frame += 1
     # train a crf and evaluate it
     train_sents = helpers.data2sents(queried_x, queried_y)
     model.train(train_sents)
