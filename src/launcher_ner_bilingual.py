@@ -114,8 +114,9 @@ def test_agent_batch(robot, game, model, budget):
     queried_y = []
     performance = []
     test_sents = helpers.data2sents(game.test_x, game.test_y)
+    game.reboot()
     while i < budget:
-        sel_ind = random.randint(0, len(game.train_x))
+        sel_ind = game.current_frame
         # construct the observation
         observation = game.get_frame(model)
         action = robot.get_action(observation)
@@ -142,8 +143,9 @@ def test_agent_online(robot, game, model, budget):
     queried_y = []
     performance = []
     test_sents = helpers.data2sents(game.test_x, game.test_y)
+    game.reboot()
     while i < budget:
-        sel_ind = random.randint(0, len(game.train_x))
+        sel_ind = game.current_frame
         # construct the observation
         observation = game.get_frame(model)
         action = robot.get_action(observation)
