@@ -3,7 +3,7 @@
  ## Introduction
 
  This source code is the basis of the following paper:
- > [Learning how to Active Learn: A Deep Reinforcement Learning Approach](http://people.eng.unimelb.edu.au/tcohn/papers/emnlp17pal.pdf), by Meng Fang, Yuan Li and Trevor Cohn, EMNLP 2017
+ > [Learning how to Active Learn: A Deep Reinforcement Learning Approach](http://people.eng.unimelb.edu.au/tcohn/papers/emnlp17pal.pdf), EMNLP 2017
 
  ## Building
 
@@ -28,6 +28,6 @@ python launcher_ner_bilingual.py --agent "CNNDQN" --episode 10000 --budget 1000 
 
 ## Data resource
 
-- [CoNLL2002](http://www.cnts.ua.ac.be/conll2002/ner/) 
-- [CoNLL2003](http://www.cnts.ua.ac.be/conll2003/ner/)
+- [CoNLL2002](http://www.cnts.ua.ac.be/conll2002/ner/) (or in this url: https://www.clips.uantwerpen.be/conll2002/ner/)
+- [CoNLL2003](http://www.cnts.ua.ac.be/conll2003/ner/) (or in this url:https://www.clips.uantwerpen.be/conll2003/ner/)
 - [Crosslingual word embeddings and corpora](http://128.2.220.95/multilingual/data)
